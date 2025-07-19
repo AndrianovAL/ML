@@ -19,7 +19,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    classification_report,  # ! TODO: use
+    classification_report,
     precision_score,
     recall_score,
     f1_score,
@@ -38,12 +38,11 @@ def load_and_explore_data():
     return df
 
 
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-# from sklearn.compose import ColumnTransformer
+# from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
 
 
 def preprocess_data(df):
@@ -68,13 +67,15 @@ def preprocess_data(df):
 
     # Column groups
     num_cols = ["claim_amount", "policy_age_days", "claimant_age", "previous_claims"]
-    cat_cols = ["claim_type"]
     # text_col = "description"
+    cat_cols = ["claim_type"]
 
     # Transformers
     num_pipeline = Pipeline(
         [("imputer", SimpleImputer(strategy="mean")), ("scaler", StandardScaler())]
     )
+
+    # text_pipeline = Pipeline([("tfidf", TfidfVectorizer(max_features=100))])
 
     cat_pipeline = Pipeline(
         [
@@ -83,14 +84,12 @@ def preprocess_data(df):
         ]
     )
 
-    # text_pipeline = Pipeline([("tfidf", TfidfVectorizer(max_features=100))])
-
     # Combine transformers
     preprocessor = ColumnTransformer(
         [
             ("num", num_pipeline, num_cols),
-            ("cat", cat_pipeline, cat_cols),
             # ("text", text_pipeline, text_col),
+            ("cat", cat_pipeline, cat_cols),
         ]
     )
 
@@ -197,9 +196,9 @@ def main():
 if __name__ == "__main__":
     main()
 
-# ! TODO: Business Context:
-# TODO High claim amounts (>$10K) often require extra scrutiny
-# TODO Customers with multiple previous claims have higher fraud risk
-# TODO New policies (low policy_age_days) combined with high claims are suspicious
+# TODO: Business Context:
+# * High claim amounts (>$10K) often require extra scrutiny
+# * Customers with multiple previous claims have higher fraud risk
+# * New policies (low policy_age_days) combined with high claims are suspicious
 # * Balance is critical: false positives (FP) anger customers, missed fraud (FN) costs money
 # FYI: recision = TP / (TP + FP), Recall = TP / (TP + FN)
